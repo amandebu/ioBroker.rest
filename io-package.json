@@ -1,0 +1,71 @@
+{
+    "common": {
+        "name": "rest",
+        "version": "0.0.1",
+        "news": {
+            "0.0.1": {
+                "en": "initial release",
+                "de": "Erstveröffentlichung",
+                "ru": "Начальная версия",
+                "pt": "lançamento inicial",
+                "nl": "Eerste uitgave",
+                "fr": "Première version",
+                "it": "Versione iniziale",
+                "es": "Versión inicial",
+                "pl": "Pierwsze wydanie",
+                "zh-cn": "首次出版"
+            }
+        },
+        "titleLang": {
+            "en": "Rest Objects",
+            "de": "Rest Objects"
+        },
+        "desc": {
+            "en": "Creates Objects from a Rest-API",
+            "de": "Erstellt Objekte aus einer Rest-API"
+        },
+        "authors": [
+            "amandebu <andi-amandebu@ampferl.net>"
+        ],
+        "keywords": [
+            "ioBroker",
+            "rest",
+            "Smart Home",
+            "home automation"
+        ],
+        "license": "MIT",
+        "platform": "Javascript/Node.js",
+        "main": "main.js",
+        "icon": "rest.png",
+        "enabled": true,
+        "extIcon": "https://raw.githubusercontent.com/amandebu/ioBroker.rest/master/admin/rest.png",
+        "readme": "https://github.com/amandebu/ioBroker.rest/blob/master/README.md",
+        "loglevel": "info",
+        "mode": "daemon",
+        "type": "general",
+        "compact": true,
+        "materialize": true,
+        "materializeTab": true,
+        "adminTab": {
+            "singleton": true,
+            "name": {
+                "en": "Template (JavaScript)",
+                "de": "Vorlage (JavaScript)"
+            },
+            "link": "",
+            "fa-icon": "info"
+        },
+        "supportCustoms": true,
+        "dependencies": [
+            {
+                "js-controller": ">=2.0.0"
+            }
+        ]
+    },
+    "native": {
+        "option1": true,
+        "option2": "42"
+    },
+    "objects": [],
+    "instanceObjects": []
+}
