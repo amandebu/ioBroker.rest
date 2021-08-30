@@ -20,7 +20,7 @@ class RestObjects extends utils.Adapter {
      */
     constructor(options) {
         super({
-            //...options,
+            ...options,
             name: 'rest'//,
         });
         this.on('ready', this.onReady.bind(this));
@@ -38,22 +38,98 @@ class RestObjects extends utils.Adapter {
 
         // The adapters config (in the instance object everything under the attribute "native") is accessible via
         // this.config:
+        this.log.info('adapter name: '+adapterName);
         this.log.info('config restURL: ' + this.config.restURL);
-        
-        request(
-            {
-                url: this.config.restURL,
-                json: true
-            },
-            function(error, response, content) {
-                if (!error && response.statusCode==200) {
-                    this.log.debug('huhu');
-                } else {
-                    this.log.debug(error);
-                }
 
+        
+        axios({
+            method: 'get',
+            url: this.config.restURL,
+            timeout: 10000,
+            responseType: 'json'
+        }).then(
+            async (response) => {
+                const content = response.data;
+
+                this.log.debug('got response');
+                this.log.debug('received data (' + response.status + '): ' + JSON.stringify(content));
+
+/*                await this.setObjectNotExistsAsync(path + 'responseCode', {
+                    type: 'state',
+                    common: {
+                        name: 'responseCode',
+                        type: 'number',
+                        role: 'value',
+                        read: true,
+                        write: false
+                    },
+                    native: {}
+                });
+                this.setState(path + 'responseCode', {val: response.status, ack: true});
+
+                if (content && Object.prototype.hasOwnProperty.call(content, 'sensordatavalues')) {
+                    for (const key in content.sensordatavalues) {
+                        const obj = content.sensordatavalues[key];
+
+                        let unit = null;
+                        let role = 'value';
+
+                        if (obj.value_type.indexOf('SDS_') == 0) {
+                            unit = 'µg/m³';
+                            role = 'value.ppm';
+                        } else if (obj.value_type.indexOf('temperature') >= 0) {
+                            unit = '°C';
+                            role = 'value.temperature';
+                        } else if (obj.value_type.indexOf('humidity') >= 0) {
+                            unit = '%';
+                            role = 'value.humidity';
+                        } else if (obj.value_type.indexOf('pressure') >= 0) {
+                            unit = 'Pa';
+                            role = 'value.pressure';
+                        } else if (obj.value_type.indexOf('noise') >= 0) {
+                            unit = 'dB(A)';
+                            role = 'value';
+                        } else if (Object.prototype.hasOwnProperty.call(unitList, obj.value_type)) {
+                            unit = unitList[obj.value_type];
+                            role = roleList[obj.value_type];
+                        }
+
+                        await this.setObjectNotExistsAsync(path + obj.value_type, {
+                            type: 'state',
+                            common: {
+                                name: obj.value_type,
+                                type: 'number',
+                                role: role,
+                                unit: unit,
+                                read: true,
+                                write: false
+                            },
+                            native: {}
+                        });
+                        this.setState(path + obj.value_type, {val: parseFloat(obj.value), ack: true});
+                    }
+                } else {
+                    this.log.warn('Response has no valid content. Check hostname/IP address and try again.');
+                }
+*/
             }
-        )
+        ).catch(
+            (error) => {
+                if (error.response) {
+                    // The request was made and the server responded with a status code
+
+                    this.log.warn('received error ' + error.response.status + ' response with content: ' + JSON.stringify(error.response.data));
+                } else if (error.request) {
+                    // The request was made but no response was received
+                    // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
+                    // http.ClientRequest in node.js<div></div>
+                    this.log.error(error.message);
+                } else {
+                    // Something happened in setting up the request that triggered an Error
+                    this.log.error(error.message);
+                }
+            }
+        );
 
         /*
         For every state in the system there has to be also an object of type state
