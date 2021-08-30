@@ -1,22 +1,22 @@
 {
-  "name": "iobroker.template",
+  "name": "iobroker.rest",
   "version": "0.0.1",
-  "description": "Template for adapter development",
+  "description": "Create Objects from REST-API",
   "author": {
-    "name": "Author",
-    "email": "author@mail.com"
+    "name": "amandebu",
+    "email": "andi-amandebu@ampferl.net"
   },
-  "homepage": "https://github.com/Author/ioBroker.template",
+  "homepage": "https://github.com/amandebu/ioBroker.rest",
   "license": "MIT",
   "keywords": [
     "ioBroker",
-    "template",
+    "REST",
     "Smart Home",
     "home automation"
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/Author/ioBroker.template"
+    "url": "https://github.com/amandebu/ioBroker.rest"
   },
   "dependencies": {
     "@iobroker/adapter-core": "^2.5.0"
@@ -55,7 +55,7 @@
     "release": "release-script"
   },
   "bugs": {
-    "url": "https://github.com/Author/ioBroker.template/issues"
+    "url": "https://github.com/amandebu/ioBroker.rest/issues"
   },
   "readmeFilename": "README.md"
 }
