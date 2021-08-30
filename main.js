@@ -7,19 +7,21 @@
 // The adapter-core module gives you access to the core ioBroker functions
 // you need to create an adapter
 const utils = require('@iobroker/adapter-core');
+const axios = require('axios');
+const adapterName = require('./package.json').name.split('.').pop();
 
 // Load your modules here, e.g.:
 // const fs = require("fs");
 
-class Template extends utils.Adapter {
+class RestObjects extends utils.Adapter {
 
     /**
      * @param {Partial<utils.AdapterOptions>} [options={}]
      */
     constructor(options) {
         super({
-            ...options,
-            name: 'template',
+            //...options,
+            name: 'rest'//,
         });
         this.on('ready', this.onReady.bind(this));
         this.on('stateChange', this.onStateChange.bind(this));
@@ -36,8 +38,22 @@ class Template extends utils.Adapter {
 
         // The adapters config (in the instance object everything under the attribute "native") is accessible via
         // this.config:
-        this.log.info('config option1: ' + this.config.option1);
-        this.log.info('config option2: ' + this.config.option2);
+        this.log.info('config restURL: ' + this.config.restURL);
+        
+        request(
+            {
+                url: this.config.restURL,
+                json: true
+            },
+            function(error, response, content) {
+                if (!error && response.statusCode==200) {
+                    this.log.debug('huhu');
+                } else {
+                    this.log.debug(error);
+                }
+
+            }
+        )
 
         /*
         For every state in the system there has to be also an object of type state
@@ -160,8 +176,8 @@ if (require.main !== module) {
     /**
      * @param {Partial<utils.AdapterOptions>} [options={}]
      */
-    module.exports = (options) => new Template(options);
+    module.exports = (options) => new RestObjects(options);
 } else {
     // otherwise start the instance directly
-    new Template();
+    new RestObjects();
 }
