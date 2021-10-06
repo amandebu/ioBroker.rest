@@ -1,12 +1,12 @@
+/* jshint -W097 */
+/* jshint strict: false */
+/* jslint node: true */
 'use strict';
-
-/*
- * Created with @iobroker/create-adapter v1.34.1
- */
 
 // The adapter-core module gives you access to the core ioBroker functions
 // you need to create an adapter
 const utils = require('@iobroker/adapter-core');
+const { testAdapter } = require('@iobroker/testing/build/tests/integration');
 const axios = require('axios');
 const adapterName = require('./package.json').name.split('.').pop();
 
@@ -30,88 +30,51 @@ class RestObjects extends utils.Adapter {
         this.on('unload', this.onUnload.bind(this));
     }
 
+    processObject(obj,path='',initial=false) {
+        if (typeof obj=='object') {
+            if (path!='') {path=path+'.'}
+            for (const [key, value] of Object.entries(obj)) {
+                this.processObject(value,path+key)
+    //            this.log.info(`${key}: ${value}`);
+            }
+        } else {
+            const objtype=typeof obj;
+            this.log.info(`${path}: ${obj} (${objtype})`);
+            if (!initial) {
+                this.setObjectNotExistsAsync(path, {
+                    type: 'state',
+                    common: {
+                        name: path,
+    //                    type: 'string',
+                        type: typeof ((obj.constructor) (obj)),
+                        role: 'value',
+                        read: true,
+                        write: false,
+                    },
+                    native: {}
+                });
+    //            this.setStateAsync(path, true);
+                var currentValue=null;
+            }
+//            this.getState(path,this.getValue);
+            this.setState(path,{val: obj, ack: true})   
+            //this.setStateAsync(path, true); 
+        }
+    }
+
     /**
      * Is called when databases are connected and adapter received configuration.
      */
-    async onReady() {
-        // Initialize your adapter here
 
-        // The adapters config (in the instance object everything under the attribute "native") is accessible via
-        // this.config:
-        this.log.info('adapter name: '+adapterName);
-        this.log.info('config restURL: ' + this.config.restURL);
-
-        
+    refresh(restURL,initial=false) {
         axios({
             method: 'get',
-            url: this.config.restURL,
+            url: restURL,
             timeout: 10000,
             responseType: 'json'
         }).then(
             async (response) => {
-                const content = response.data;
-
-                this.log.debug('got response');
-                this.log.debug('received data (' + response.status + '): ' + JSON.stringify(content));
-
-/*                await this.setObjectNotExistsAsync(path + 'responseCode', {
-                    type: 'state',
-                    common: {
-                        name: 'responseCode',
-                        type: 'number',
-                        role: 'value',
-                        read: true,
-                        write: false
-                    },
-                    native: {}
-                });
-                this.setState(path + 'responseCode', {val: response.status, ack: true});
-
-                if (content && Object.prototype.hasOwnProperty.call(content, 'sensordatavalues')) {
-                    for (const key in content.sensordatavalues) {
-                        const obj = content.sensordatavalues[key];
-
-                        let unit = null;
-                        let role = 'value';
-
-                        if (obj.value_type.indexOf('SDS_') == 0) {
-                            unit = 'µg/m³';
-                            role = 'value.ppm';
-                        } else if (obj.value_type.indexOf('temperature') >= 0) {
-                            unit = '°C';
-                            role = 'value.temperature';
-                        } else if (obj.value_type.indexOf('humidity') >= 0) {
-                            unit = '%';
-                            role = 'value.humidity';
-                        } else if (obj.value_type.indexOf('pressure') >= 0) {
-                            unit = 'Pa';
-                            role = 'value.pressure';
-                        } else if (obj.value_type.indexOf('noise') >= 0) {
-                            unit = 'dB(A)';
-                            role = 'value';
-                        } else if (Object.prototype.hasOwnProperty.call(unitList, obj.value_type)) {
-                            unit = unitList[obj.value_type];
-                            role = roleList[obj.value_type];
-                        }
-
-                        await this.setObjectNotExistsAsync(path + obj.value_type, {
-                            type: 'state',
-                            common: {
-                                name: obj.value_type,
-                                type: 'number',
-                                role: role,
-                                unit: unit,
-                                read: true,
-                                write: false
-                            },
-                            native: {}
-                        });
-                        this.setState(path + obj.value_type, {val: parseFloat(obj.value), ack: true});
-                    }
-                } else {
-                    this.log.warn('Response has no valid content. Check hostname/IP address and try again.');
-                }
-*/
+                this.processObject(response.data,'',initial=true);
             }
         ).catch(
             (error) => {
@@ -130,26 +93,33 @@ class RestObjects extends utils.Adapter {
                 }
             }
         );
+    }
+
+    tick(that) {
+        that.log.info('tick');
+        that.setTimeout(that.tick,1000,that);
+    }
+    
+    async onReady() {
+        // Initialize your adapter here
+
+        // The adapters config (in the instance object everything under the attribute "native") is accessible via
+        // this.config:
+        this.log.info('adapter name: '+adapterName);
+        const restURL=this.config.restURL;
+        this.log.info('config rest-URL: ' + restURL);
+
+        this.refresh(restURL);
+        this.tick(this);
+        //this.setInterval(function () {this.refresh(restURL);},1000);
 
         /*
         For every state in the system there has to be also an object of type state
         Here a simple template for a boolean variable named "testVariable"
         Because every adapter instance uses its own unique namespace variable names can't collide with other adapters variables
         */
-        await this.setObjectNotExistsAsync('testVariable', {
-            type: 'state',
-            common: {
-                name: 'testVariable',
-                type: 'boolean',
-                role: 'indicator',
-                read: true,
-                write: true,
-            },
-            native: {},
-        });
-
         // In order to get state updates, you need to subscribe to them. The following line adds a subscription for our variable we have created above.
-        this.subscribeStates('testVariable');
+        this.subscribeStates('*');
         // You can also add a subscription for multiple states. The following line watches all states starting with "lights."
         // this.subscribeStates('lights.*');
         // Or, if you really must, you can also watch all states. Don't do this if you don't need to. Otherwise this will cause a lot of unnecessary load on the system:
@@ -160,21 +130,21 @@ class RestObjects extends utils.Adapter {
             you will notice that each setState will cause the stateChange event to fire (because of above subscribeStates cmd)
         */
         // the variable testVariable is set to true as command (ack=false)
-        await this.setStateAsync('testVariable', true);
+//        await this.setStateAsync('testVariable', true);
 
         // same thing, but the value is flagged "ack"
         // ack should be always set to true if the value is received from or acknowledged from the target system
-        await this.setStateAsync('testVariable', { val: true, ack: true });
+//        await this.setStateAsync('testVariable', { val: true, ack: true });
 
         // same thing, but the state is deleted after 30s (getState will return null afterwards)
-        await this.setStateAsync('testVariable', { val: true, ack: true, expire: 30 });
+//        await this.setStateAsync('testVariable', { val: true, ack: true, expire: 30 });
 
         // examples for the checkPassword/checkGroup functions
-        let result = await this.checkPasswordAsync('admin', 'iobroker');
-        this.log.info('check user admin pw iobroker: ' + result);
+//        let result = await this.checkPasswordAsync('admin', 'iobroker');
+//        this.log.info('check user admin pw iobroker: ' + result);
 
-        result = await this.checkGroupAsync('admin', 'admin');
-        this.log.info('check group user admin group admin: ' + result);
+//        result = await this.checkGroupAsync('admin', 'admin');
+//        this.log.info('check group user admin group admin: ' + result);
     }
 
     /**
