@@ -66,7 +66,7 @@ class RestObjects extends utils.Adapter {
      * Is called when databases are connected and adapter received configuration.
      */
 
-    refresh(restURL,initial=false) {
+    refresh(that,restURL,interval,initial=false) {
         axios({
             method: 'get',
             url: restURL,
@@ -74,30 +74,31 @@ class RestObjects extends utils.Adapter {
             responseType: 'json'
         }).then(
             async (response) => {
-                this.processObject(response.data,'',initial=true);
+                that.processObject(response.data,'',initial=true);
             }
         ).catch(
             (error) => {
                 if (error.response) {
                     // The request was made and the server responded with a status code
 
-                    this.log.warn('received error ' + error.response.status + ' response with content: ' + JSON.stringify(error.response.data));
+                    that.log.warn('received error ' + error.response.status + ' response with content: ' + JSON.stringify(error.response.data));
                 } else if (error.request) {
                     // The request was made but no response was received
                     // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
                     // http.ClientRequest in node.js<div></div>
-                    this.log.error(error.message);
+                    that.log.error(error.message);
                 } else {
                     // Something happened in setting up the request that triggered an Error
-                    this.log.error(error.message);
+                    that.log.error(error.message);
                 }
             }
         );
+        that.setTimeout(that.refresh,interval,that,restURL,interval)
     }
 
-    tick(that) {
+    tick(that,interval) {
         that.log.info('tick');
-        that.setTimeout(that.tick,1000,that);
+        that.setTimeout(that.tick,interval,that,interval);
     }
     
     async onReady() {
@@ -107,10 +108,11 @@ class RestObjects extends utils.Adapter {
         // this.config:
         this.log.info('adapter name: '+adapterName);
         const restURL=this.config.restURL;
+        const interval=this.config.interval;
         this.log.info('config rest-URL: ' + restURL);
 
-        this.refresh(restURL);
-        this.tick(this);
+        this.refresh(this,restURL,interval,true);
+        //this.tick(this,interval);
         //this.setInterval(function () {this.refresh(restURL);},1000);
 
         /*
