@@ -30,6 +30,8 @@ class RestObjects extends utils.Adapter {
         this.on('unload', this.onUnload.bind(this));
     }
 
+    timeout=null
+
     processObject(obj,path='',initial=false) {
         if (typeof obj=='object') {
             if (path!='') {path=path+'.'}
@@ -39,7 +41,7 @@ class RestObjects extends utils.Adapter {
             }
         } else {
             const objtype=typeof obj;
-            this.log.info(`${path}: ${obj} (${objtype})`);
+            //this.log.info(`${path}: ${obj} (${objtype})`);
             if (!initial) {
                 this.setObjectNotExistsAsync(path, {
                     type: 'state',
@@ -53,11 +55,8 @@ class RestObjects extends utils.Adapter {
                     },
                     native: {}
                 });
-    //            this.setStateAsync(path, true);
-                var currentValue=null;
             }
-//            this.getState(path,this.getValue);
-            this.setState(path,{val: obj, ack: true})   
+            this.setState(path,{val: obj, ack: true});   
             //this.setStateAsync(path, true); 
         }
     }
@@ -93,14 +92,9 @@ class RestObjects extends utils.Adapter {
                 }
             }
         );
-        that.setTimeout(that.refresh,interval,that,restURL,interval)
+        that.timeout=that.setTimeout(that.refresh,interval,that,restURL,interval)
     }
 
-    tick(that,interval) {
-        that.log.info('tick');
-        that.setTimeout(that.tick,interval,that,interval);
-    }
-    
     async onReady() {
         // Initialize your adapter here
 
@@ -109,7 +103,7 @@ class RestObjects extends utils.Adapter {
         this.log.info('adapter name: '+adapterName);
         const restURL=this.config.restURL;
         const interval=this.config.interval;
-        this.log.info('config rest-URL: ' + restURL);
+        this.log.info('config rest-URL: ' + restURL + ', interval[ms]: '+ interval);
 
         this.refresh(this,restURL,interval,true);
         //this.tick(this,interval);
@@ -160,7 +154,7 @@ class RestObjects extends utils.Adapter {
             // clearTimeout(timeout2);
             // ...
             // clearInterval(interval1);
-
+            this.clearTimeout(this.timeout);    
             callback();
         } catch (e) {
             callback();
