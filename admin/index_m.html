@@ -78,20 +78,28 @@
         <!-- For example columns with settings: -->
         <div class="row">
             <div class="col s6 input-field">
-                <input type="text" class="value" id="restURL" />
-                <label for="address" >Rest-URL</label>
-                <span>enter full url for Rest-State</span>
+                <input type="text" class="value" id="server" />
+                <label for="address" >Server</label>
+                <span>enter server url</span>
             </div>
-        </div>
-        <div class="row">
-                <div class="col s12 m4 l1 no-if-extend">
+            <div class="col s12 m4 l1 no-if-extend">
                 <input class="value" id="interval" size="10" type="number"/>
                 <label class="translate" for="port">Interval:</label>
                 <span>enter polling interval in ms</span>
             </div>
         </div>
-    </div>
-
+        <div class="row">
+            <div class="col s6 input-field">
+                <input type="text" class="value" id="dataURI" />
+                <label for="address" >data-URI</label>
+                <span>enter URI for data retrieving</span>
+            </div>
+            <div class="col s6 input-field">
+                <input type="text" class="value" id="configURI" />
+                <label for="address" >config-URI</label>
+                <span>enter URI for config retrieving</span>
+            </div>
+        </div>
     </div>
 
 </body>

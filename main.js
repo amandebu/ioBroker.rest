@@ -105,7 +105,8 @@ class RestObjects extends utils.Adapter {
         // The adapters config (in the instance object everything under the attribute "native") is accessible via
         // this.config:
         this.log.info('adapter name: '+adapterName);
-        const restURL=this.config.restURL;
+        const restURL=this.config.dataURI.replaceAll("%server%",this.config.server);
+        const configURL=this.config.configURI.replaceAll("%server%",this.config.server);
         const interval=this.config.interval;
         this.log.info('config rest-URL: ' + restURL + ', interval[ms]: '+ interval);
 
