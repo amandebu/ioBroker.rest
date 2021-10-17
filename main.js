@@ -58,7 +58,7 @@ class RestObjects extends utils.Adapter {
             }
             let that=this;
             this.getState(path,function (err,state) {
-                if (obj!=state.val) {
+                if ((state==null)||(obj!=state.val)) {
                     that.setState(path,{val: obj, ack: true});   
                 }
             });
