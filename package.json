@@ -19,7 +19,7 @@
     "url": "https://github.com/amandebu/ioBroker.rest"
   },
   "dependencies": {
-    "@iobroker/adapter-core": "^2.5.0"
+    "@iobroker/adapter-core": "^2.6.0"
   },
   "devDependencies": {
     "@alcalzone/release-script": "^3.4.1",
